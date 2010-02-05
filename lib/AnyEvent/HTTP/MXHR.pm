@@ -4,7 +4,7 @@ use AnyEvent::HTTP;
 use AnyEvent::Util qw(guard);
 use base qw(Exporter);
 our @EXPORT = qw(mxhr_get);
-our $VERSION = '0.00001';
+our $VERSION = '0.00002';
 
 sub mxhr_get ($@) {
     my $cb = pop;
@@ -24,7 +24,7 @@ sub mxhr_get ($@) {
 
             if ($headers->{"content-type"} =~ m{^multipart/mixed\s*;\s*boundary="([^"]+)"}) {
                 $state{boundary} = $1;
-                $state{boundary_re} = qr|\r?\n--$state{boundary}\n?|;
+                $state{boundary_re} = qr!(?:^|\r?\n)--$state{boundary}\n?!;
                 return 1;
             } else {
                 %state = ();
@@ -53,7 +53,8 @@ sub mxhr_get ($@) {
             my $callback; $callback = sub {
                 my ($handle, $data) = @_;
 
-                if ($data !~ s/\r?\n--$state{boundary}\n?$// ) {
+                $data =~ s/^\s+//;
+                if ($data !~ s/(?:^|\r?\n)--$state{boundary}\n?$// ) {
                     # shouldn't even get here
                     $on_error->("no boundary found");
                     %state = ();
