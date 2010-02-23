@@ -4,7 +4,7 @@ use AnyEvent::HTTP;
 use AnyEvent::Util qw(guard);
 use base qw(Exporter);
 our @EXPORT = qw(mxhr_get);
-our $VERSION = '0.00003';
+our $VERSION = '0.00004';
 
 sub mxhr_get ($@) {
     my $cb = pop;
@@ -74,7 +74,7 @@ sub mxhr_get ($@) {
                     $n = lc $n;
                     ($n, $v);
                 } split(/\r?\n/, $headers);
-                if (! eval { $cb->($data, \%headers) }) {
+                if (! eval { $cb->($data, \%headers, $handle) }) {
                     %state = ();
                     return;
                 }
@@ -118,7 +118,7 @@ WARNING: alpha quality code!
 
 =head1 FUNCTION
 
-=head2 mxhr_get $uri, key => value..., $cb->($body, $headers)
+=head2 mxhr_get $uri, key => value..., $cb->($body, $headers, $handle)
 
 Sends an HTTP GET request, and for each item in the multipar response, 
 executes C<$cb>. C<$cb> receives the body of the item, and the sub headers
