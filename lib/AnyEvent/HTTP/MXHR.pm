@@ -1,10 +1,11 @@
 package AnyEvent::HTTP::MXHR;
 use strict;
+use AnyEvent '6.01';
 use AnyEvent::HTTP;
 use AnyEvent::Util qw(guard);
 use base qw(Exporter);
 our @EXPORT = qw(mxhr_get);
-our $VERSION = '0.00006';
+our $VERSION = '0.00007';
 
 sub mxhr_get ($@) {
     my $cb = pop;
@@ -40,6 +41,8 @@ sub mxhr_get ($@) {
                 $on_error->("Connection failed") if $on_error;
                 return ();
             }
+
+            $state{handle} = $handle;
 
             my $callback; $callback = sub {
                 my ($handle, $data) = @_;
